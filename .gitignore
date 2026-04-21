@@ -9,3 +9,8 @@ env/
 # Fichiers caches de Python
 __pycache__/
 *.pyc
+
+# Autres fichiers
+
+logs/
+*.txt
