@@ -1,9 +1,9 @@
 import sys
-from app import AppNoxia
+from app import NoxiaDashboard
 
 if __name__ == "__main__":
     try :
-        app = AppNoxia()
+        app = NoxiaDashboard()
         app.mainloop()
     except KeyboardInterrupt:
         sys.exit(0)
