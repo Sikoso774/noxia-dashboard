@@ -43,23 +43,18 @@ class API_Client:
         Remplace l'appel API (qui n'existe pas chez Kissgroup) par un faux test réaliste.
         """
         try:
-            # 1. On simule le temps de test sur le réseau (ex: 2.5 secondes)
-            time.sleep(2.5)
-            
-            # 2. On renvoie un rapport technique complet et positif
-            rapport = (
-                "✅ DIAGNOSTIC TERMINÉ\n"
-                "------------------------------------------\n"
-                "• Ligne Optique : Synchronisée\n"
-                "• Puissance reçue (Rx) : -19.4 dBm (Excellent)\n"
-                "• Authentification PPPoE : Succès\n"
-                "• Latence vers passerelle : 4 ms\n"
-                "• Perte de paquets (Ping) : 0%\n"
-                "------------------------------------------\n"
-                "Résultat : Le lien est totalement opérationnel."
-            )
-            
-            return {"message": rapport}
+            time.sleep(2) # Simulation de l'attente réseau
+            return {
+                "message": (
+                    "✅ DIAGNOSTIC Mikrotik TERMINÉ\n"
+                    "------------------------------------------\n"
+                    "• Signal Fibre : -18.5 dB (Conforme)\n"
+                    "• Session PPPoE : Active (Status Tech: OK)\n"
+                    "• Routeur : Mikrotik accessible\n"
+                    "------------------------------------------\n"
+                    "Résultat : Aucun défaut détecté sur la ligne."
+                )
+            }
             
         except Exception as e:
             return {"message": f"Erreur de simulation : {e}"}

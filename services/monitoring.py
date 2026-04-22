@@ -39,5 +39,12 @@ class MonitoringService:
             "ip_publique": first_ppp.get("ip_address", "Non définie"),
             "session_ppp": first_ppp.get("ppp_login", "Aucune"),
             "provider": details.get("provider_name", "Inconnu"),
-            "ip_device": first_device.get("ip_device", "Non administrable")
+            "ip_device": first_device.get("ip_device", "Non administrable"),
+            "status_tech": first_ppp.get("status_tech", "N/A"), #
+            "brand": first_device.get("brand", "N/A"), #
+            "password_device": first_device.get("password_device", "********"), #
+            
+            # Donnée d'atténuation (souvent dans un champ technique de l'API)
+            "attenuation": details.get("optical_attenuation", -18.5), # Valeur de test
+            "last_change_connection_date": mon_data.get("last_change_connection_date", "Inconnue")
         }

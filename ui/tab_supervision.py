@@ -58,6 +58,15 @@ class TabSupervision:
         self.label_pppoe = ctk.CTkLabel(self.tech_frame, text="Session PPP : -", font=("Arial", 11), anchor="w")
         self.label_pppoe.pack(fill="x", padx=10, pady=2)
         
+        self.label_brand = ctk.CTkLabel(self.tech_frame, text="Marque : -", font=("Arial", 11), anchor="w")
+        self.label_brand.pack(fill="x", padx=10, pady=2)
+
+        self.label_pass = ctk.CTkLabel(self.tech_frame, text="Pass Admin : -", font=("Arial", 11), anchor="w")
+        self.label_pass.pack(fill="x", padx=10, pady=2)
+
+        self.label_attenuation = ctk.CTkLabel(self.tech_frame, text="Atténuation : -", font=("Arial", 11, "bold"), anchor="w")
+        self.label_attenuation.pack(fill="x", padx=10, pady=(2, 10))
+        
         self.label_device = ctk.CTkLabel(self.tech_frame, text="IP Équipement : -", font=("Arial", 11), anchor="w")
         self.label_device.pack(fill="x", padx=10, pady=(2, 10))
         
@@ -176,6 +185,13 @@ class TabSupervision:
         self.label_pppoe.configure(text=f"Session PPP : {data['session_ppp']}")
         self.label_provider.configure(text=f"Fournisseur : {data['provider']}")
         self.label_device.configure(text=f"IP Équipement : {data['ip_device']}")
+        self.label_brand.configure(text=f"Marque : {data['brand']}")
+        self.label_pass.configure(text=f"Pass Admin : {data['password_device']}")
+        
+        # Logique d'alerte pour l'atténuation
+        # att = data['attenuation']
+        # color = COLORS["accent"] if att >= -20 else COLORS["error"]
+        # self.label_attenuation.configure(text=f"Atténuation : {att} dB", text_color=color)
         
         # Mise à jour de la carte
         lat, lng = data['lat'], data['lng']
