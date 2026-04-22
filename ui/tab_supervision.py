@@ -150,36 +150,48 @@ class TabSupervision:
             self.parent.after(0, lambda: self.label_status.configure(text="ERREUR RÉSEAU", text_color="red"))
 
     def _update_ui_safe(self, data):
-            """Met à jour les textes de l'interface graphique en toute sécurité"""
+        """Met à jour les textes de l'interface graphique en toute sécurité"""
+        
+        # On nettoie le texte (enlève les espaces invisibles) et on vérifie
+        is_ok = data['status'].strip().upper() == "OK"
+        
+        # Statut et Adresse
+        self.label_status.configure(text=f"STATUT : {data['status']}", 
+                                    text_color=COLORS["accent"] if is_ok else COLORS["error"])
+        if data['address']:
+            self.label_address.configure(text=f"Adresse : {data['address']}")
+        
+        last_conn = data.get("last_change_connection_date", "Inconnue")
+        if "T" in last_conn:
+            date_part = last_conn.split("T")[0]
+            time_part = last_conn.split("T")[1][:5]
+            formatted_date = f"{date_part} à {time_part}"
+        else:
+            formatted_date = last_conn
+
+        self.label_last_conn.configure(text=f"Dernière co : {formatted_date}")
+        # ... (reste des labels techniques) ... 
+        # NOUVEAU : Mise à jour des 4 champs techniques que j'avais oubliés
+        self.label_ip.configure(text=f"IP Publique : {data['ip_publique']}")
+        self.label_pppoe.configure(text=f"Session PPP : {data['session_ppp']}")
+        self.label_provider.configure(text=f"Fournisseur : {data['provider']}")
+        self.label_device.configure(text=f"IP Équipement : {data['ip_device']}")
+        
+        # Mise à jour de la carte
+        lat, lng = data['lat'], data['lng']
+        if lat and lng:
+            self.map_widget.delete_all_marker()
+            self.map_widget.set_position(lat, lng)
+            icone = self.img_pin_ok if data['status'] == "OK" else self.img_pin_error
             
-            # On nettoie le texte (enlève les espaces invisibles) et on vérifie
-            is_ok = data['status'].strip().upper() == "OK"
+            if icone:
+                self.map_widget.set_marker(lat, lng, text=f"État : {data['status']}", icon=icone, text_color=COLORS["text"])
+            else:
+                self.map_widget.set_marker(lat, lng, text=f"État : {data['status']}", text_color=COLORS["text"])
             
-            # Statut et Adresse
-            self.label_status.configure(text=f"STATUT : {data['status']}", 
-                                        text_color=COLORS["accent"] if is_ok else COLORS["error"])
-            if data['address']:
-                self.label_address.configure(text=f"Adresse : {data['address']}")
-                
-            # NOUVEAU : Mise à jour des 4 champs techniques que j'avais oubliés
-            self.label_ip.configure(text=f"IP Publique : {data['ip_publique']}")
-            self.label_pppoe.configure(text=f"Session PPP : {data['session_ppp']}")
-            self.label_provider.configure(text=f"Fournisseur : {data['provider']}")
-            self.label_device.configure(text=f"IP Équipement : {data['ip_device']}")
+            self.map_widget.set_zoom(13)
             
-            # Mise à jour de la carte
-            lat, lng = data['lat'], data['lng']
-            if lat and lng:
-                self.map_widget.delete_all_marker()
-                self.map_widget.set_position(lat, lng)
-                icone = self.img_pin_ok if data['status'] == "OK" else self.img_pin_error
-                
-                if icone:
-                    self.map_widget.set_marker(lat, lng, text=f"État : {data['status']}", icon=icone, text_color=COLORS["text"])
-                else:
-                    self.map_widget.set_marker(lat, lng, text=f"État : {data['status']}", text_color=COLORS["text"])
-                
-                self.map_widget.set_zoom(13)
+        
 
     def auto_refresh_monitoring(self):
             """Rafraîchissement automatique toutes les 60 secondes"""
