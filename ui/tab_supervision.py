@@ -2,11 +2,12 @@ import threading
 from ui.supervision.info_sidebar import InfoSidebar
 from ui.supervision.map_view import MapView
 from services.monitoring import MonitoringService
-
+from services.diagnostic import DiagnosticService
 class TabSupervision:
     def __init__(self, parent_frame, api_client):
         self.parent = parent_frame
         self.api = api_client
+        self.diag = DiagnosticService(self.api)
         self.mon_service = MonitoringService(api_client)
         self.current_link_code = ""
 
@@ -33,7 +34,9 @@ class TabSupervision:
         try:
             data = self.mon_service.fetch_comprehensive_data(self.current_link_code)
             self.parent.after(0, self._update_ui_safe, data)
-        except: pass
+        except Exception as e:
+            logger.error(f"Erreur chargement supervision : {e}")
+            self.parent.after(0, self.sidebar.set_status_error, "Erreur de chargement")
 
     def _update_ui_safe(self, data):
         self.sidebar.update_display(data)
@@ -45,7 +48,7 @@ class TabSupervision:
         threading.Thread(target=self._threaded_diag, daemon=True).start()
 
     def _threaded_diag(self):
-        result = self.api.run_diagnostic(self.current_link_code)
+        result = self.diag.run_full_diagnostic(self.current_link_code)
         self.parent.after(0, self.sidebar.set_diag_text, result.get("message"))
 
     def auto_refresh_monitoring(self):

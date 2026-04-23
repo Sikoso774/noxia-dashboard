@@ -49,10 +49,3 @@ class API_Client:
         except Exception as e:
             logger.error(f"Erreur réseau sur {link_code} : {e}")
             return {}
-
-    def run_diagnostic(self, link_code):
-        # On garde notre simulateur mais on logge l'action
-        logger.info(f"Démarrage du diagnostic simulé pour {link_code}")
-        time.sleep(2)
-        logger.debug("Simulation de l'analyse des paquets terminée")
-        return {"message": "✅ Diagnostic (Simulé) : Tout est OK."}

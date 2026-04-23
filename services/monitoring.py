@@ -1,5 +1,7 @@
 from services.api_client import API_Client
+from config.logger import setup_logger
 
+logger = setup_logger("MonitoringSrervice")
 class MonitoringService:
     def __init__(self, api_client: API_Client):
         self.api = api_client
@@ -11,14 +13,16 @@ class MonitoringService:
             mon_list = self.api.get_monitoring_data()
             if not isinstance(mon_list, list): mon_list = [mon_list]
             mon_data = next((item for item in mon_list if item.get("id_lien") == link_code), {})
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Impossible de récupérer le monitoring pour {link_code} : {e}")
             mon_data = {}
             
         # 2. Détails techniques (PPPoE, etc.)
         try:
             details = self.api.get_link_details(link_code) or {}
-        except Exception:
-            details = {}
+        except Exception as e:
+            logger.warning(f"Impossible de récupérer le monitoring pour {link_code} : {e}")
+            mon_data = {}
         
         # 3. Sécurisation extrême des listes (Évite l'erreur de l'index 0)
         ppp_logins = details.get("ppp_logins") or []
