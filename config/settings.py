@@ -27,4 +27,4 @@ COLORS = {
 # --- RÉGLAGES ASSETS ---
 ASSETS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets")
 LOGO_FILENAME = "logo-noxia.png"
-LOGO_WIDTH = 400
+LOGO_WIDTH = 350
