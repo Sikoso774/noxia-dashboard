@@ -73,22 +73,22 @@ except Exception as e:
 
 # --- CHARTE GRAPHIQUE NOXIA SECURITY (Version Pro) ---
 COLORS = {
-    "bg": "#0d1b2e",          # Bleu nuit profond
-    "bg_darker": "#081220",   # Pour les zones très sombres
-    "card": "#1a2a3f",        # Bleu acier
-    "card_alt": "#1e3a5f",    # Variantes de cartes
-    "primary": "#2a7fc1",     # Bleu bouton
-    "primary_hover": "#1f538d",
-    "secondary": "#27ae60",
-    "secondary_hover": "#1e8449",
-    "accent": "#1a9b6e",      # Émeraude Noxia
-    "accent_hover": "#22c78a",
-    "error": "#e74c3c",       # Rouge alerte
+    "bg": "#000726",          # Fond le plus sombre (Graphiste)
+    "card": "#002359",        # Bleu intermédiaire (Graphiste)
+    "card_alt": "#01346b",    # Intermédiaire pour le survol
+    
+    # Couleurs principales unifiées pour les boutons
+    "primary": "#0251a1",     # Bleu clair (Graphiste)
+    "primary_hover": "#014282",
+    "accent": "#2e7d32",      # Vert succès/validation moins clinquant
+    "accent_hover": "#1b5e20",
+    
+    "error": "#d32f2f",       # Rouge alerte atténué
     "text": "#ffffff",        # Blanc pur
-    "text_sub": "#a0aec0",    # Gris bleuté secondaire
-    "border": "#2d4a6b",      # Bordures discrètes
-    "scroll_button": "#2d4a6b",
-    "scroll_hover": "#2a7fc1"
+    "text_sub": "#b1b9c0",    # Gris clair (Graphiste)
+    "border": "#0251a1",      # Bordures complémentaires (Graphiste)
+    "scroll_button": "#002359",
+    "scroll_hover": "#0251a1"
 }
 
 # Polices globales

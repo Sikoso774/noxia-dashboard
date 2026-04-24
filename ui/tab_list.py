@@ -61,7 +61,10 @@ class TabListe:
             self.ctrl_frame,
             text="CHARGER API",
             font=FONTS["button"],
-            fg_color=COLORS["primary"],
+            fg_color=COLORS["card"],
+            hover_color=COLORS["card_alt"],
+            border_width=1,
+            border_color=COLORS["primary"],
             command=self.load_links
         )
         self.btn_load.pack(side="left", padx=5)
@@ -70,8 +73,10 @@ class TabListe:
             self.ctrl_frame,
             text="EXPORTER CSV",
             font=FONTS["button"],
-            fg_color=COLORS["secondary"],
-            hover_color=COLORS["secondary_hover"],
+            fg_color=COLORS["card"],
+            hover_color=COLORS["card_alt"],
+            border_width=1,
+            border_color=COLORS["primary"],
             command=self.export_to_csv
         )
         self.btn_export.pack(side="left", padx=5)

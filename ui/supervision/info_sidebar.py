@@ -5,6 +5,7 @@ ainsi que les contrôles pour lancer des actions comme le diagnostic.
 """
 
 from typing import Any, Callable, Dict, Optional, Tuple
+import tkinter.filedialog as fd
 import customtkinter as ctk
 from config.settings import COLORS, FONTS
 
@@ -83,22 +84,28 @@ class InfoSidebar(ctk.CTkScrollableFrame):
             self,
             text="Rafraîchir Statut",
             font=FONTS["button"],
-            fg_color=COLORS["primary"],
-            hover_color=COLORS["primary_hover"],
+            width=0,  # S'adapte à la longueur du texte
+            fg_color=COLORS["card"],
+            hover_color=COLORS["card_alt"],
+            border_width=1,
+            border_color=COLORS["primary"],
             command=on_refresh
         )
-        self.btn_refresh.pack(pady=10, fill="x", padx=20)
+        self.btn_refresh.pack(pady=10)
 
         # Bouton Diagnostic
         self.btn_diag = ctk.CTkButton(
             self,
             text="LANCER DIAGNOSTIC",
             font=FONTS["button"],
-            fg_color=COLORS["accent"],
-            hover_color=COLORS["accent_hover"],
+            width=0,  # S'adapte à la longueur du texte
+            fg_color=COLORS["card"],
+            hover_color=COLORS["card_alt"],
+            border_width=1,
+            border_color=COLORS["primary"],
             command=on_diagnostic
         )
-        self.btn_diag.pack(pady=(15, 5), fill="x", padx=20)
+        self.btn_diag.pack(pady=(15, 25))
 
         # Création de la barre de progression (cachée par défaut)
         self.progress_bar = ctk.CTkProgressBar(
@@ -115,6 +122,36 @@ class InfoSidebar(ctk.CTkScrollableFrame):
             self, height=100, fg_color=COLORS["card"], state="disabled", wrap="word"
         )
         self.diag_result.pack(fill="x", pady=5, padx=5)
+
+        # Actions d'export (Copier / Sauvegarder)
+        self.export_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.export_frame.pack(fill="x", pady=(0, 15), padx=5)
+
+        self.btn_save = ctk.CTkButton(
+            self.export_frame,
+            text="💾",
+            font=FONTS["button"],
+            width=40,
+            fg_color=COLORS["card"],
+            hover_color=COLORS["card_alt"],
+            border_width=1,
+            border_color=COLORS["primary"],
+            command=self._save_to_file
+        )
+        self.btn_save.pack(side="right", padx=(5, 0))
+
+        self.btn_copy = ctk.CTkButton(
+            self.export_frame,
+            text="📄",
+            font=FONTS["button"],
+            width=40,
+            fg_color=COLORS["card"],
+            hover_color=COLORS["card_alt"],
+            border_width=1,
+            border_color=COLORS["primary"],
+            command=self._copy_to_clipboard
+        )
+        self.btn_copy.pack(side="right", padx=(5, 5))
 
     def _create_label(
         self,
@@ -214,3 +251,55 @@ class InfoSidebar(ctk.CTkScrollableFrame):
         self.progress_bar.stop()
         self.progress_bar.pack_forget()
         self.btn_diag.configure(state="normal")
+
+    def _get_export_text(self) -> str:
+        """Génère un rapport textuel complet (infos générales et diagnostic).
+
+        Returns:
+            str: Le texte formaté prêt à être exporté ou copié.
+        """
+        client = self.label_client.cget("text")
+        address = self.label_address.cget("text")
+        status = self.label_status.cget("text")
+        
+        tech_info = []
+        for widget in self.tech_frame.winfo_children():
+            if isinstance(widget, ctk.CTkLabel):
+                tech_info.append(widget.cget("text"))
+        tech_text = "\n".join(tech_info)
+        
+        diag_text = self.diag_result.get("1.0", "end-1c")
+        
+        return (
+            f"=== INFORMATIONS GENERALES ===\n"
+            f"{client}\n"
+            f"{address}\n\n"
+            f"=== STATUT ===\n"
+            f"{status}\n\n"
+            f"=== DETAILS TECHNIQUES ===\n"
+            f"{tech_text}\n\n"
+            f"=== RESULTAT DIAGNOSTIC ===\n"
+            f"{diag_text if diag_text.strip() else 'Aucun diagnostic exécuté.'}\n"
+        )
+
+    def _copy_to_clipboard(self) -> None:
+        """Copie le rapport généré dans le presse-papiers du système."""
+        text = self._get_export_text()
+        self.clipboard_clear()
+        self.clipboard_append(text)
+
+    def _save_to_file(self) -> None:
+        """Ouvre une boîte de dialogue pour enregistrer le rapport dans un fichier .txt."""
+        text = self._get_export_text()
+        filepath = fd.asksaveasfilename(
+            defaultextension=".txt",
+            filetypes=[("Fichiers texte", "*.txt"), ("Tous les fichiers", "*.*")],
+            title="Enregistrer le rapport de diagnostic",
+            initialfile="rapport_diagnostic.txt"
+        )
+        if filepath:
+            try:
+                with open(filepath, "w", encoding="utf-8") as f:
+                    f.write(text)
+            except Exception as e:
+                print(f"Erreur lors de la sauvegarde : {e}")

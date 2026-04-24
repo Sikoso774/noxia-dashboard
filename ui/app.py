@@ -63,10 +63,12 @@ class App(ctk.CTk):
         self.tabview = ctk.CTkTabview(
             self,
             fg_color=COLORS["bg"],
-            segmented_button_fg_color=COLORS["card"],
+            segmented_button_fg_color=COLORS["bg"],  # Rend le fond de la barre invisible
             segmented_button_selected_color=COLORS["primary"],
             segmented_button_selected_hover_color=COLORS["primary_hover"],
+            segmented_button_unselected_color=COLORS["bg"],  # Onglet inactif transparent
             segmented_button_unselected_hover_color=COLORS["card_alt"],
+            text_color=COLORS["text"]  # Texte blanc pour tous les onglets
         )
 
         # Rendre la tabview responsive pour occuper tout l'espace disponible
