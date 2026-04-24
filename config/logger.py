@@ -1,10 +1,20 @@
 import logging
+import sys
 import os
 from logging.handlers import RotatingFileHandler
 
-# On détermine le chemin du dossier logs à la racine du projet
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Même astuce que pour settings.py
+if getattr(sys, 'frozen', False):
+    # Pour les logs d'un .exe, on les met à côté du .exe lui-même
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 LOG_DIR = os.path.join(BASE_DIR, "logs")
+
+# # On détermine le chemin du dossier logs à la racine du projet
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# LOG_DIR = os.path.join(BASE_DIR, "logs")
 
 # Création automatique du dossier logs s'il n'existe pas
 if not os.path.exists(LOG_DIR):
