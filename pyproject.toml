@@ -1,5 +1,5 @@
 [project]
-name = "api"
+name = "noxia-security-gui"
 version = "0.1.0"
 description = "GUI for monitoring with CTk"
 readme = "README.md"

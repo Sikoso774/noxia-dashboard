@@ -21,37 +21,6 @@ wheels = [
 ]
 
 [[package]]
-name = "api"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "customtkinter" },
-    { name = "pillow" },
-    { name = "pydantic-settings" },
-    { name = "pytest" },
-    { name = "requests" },
-    { name = "tkintermapview" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pyinstaller" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "customtkinter", specifier = ">=5.2.2" },
-    { name = "pillow", specifier = ">=12.2.0" },
-    { name = "pydantic-settings", specifier = ">=2.14.0" },
-    { name = "pytest", specifier = ">=9.0.3" },
-    { name = "requests", specifier = ">=2.33.1" },
-    { name = "tkintermapview", specifier = ">=1.29" },
-]
-
-[package.metadata.requires-dev]
-dev = [{ name = "pyinstaller", specifier = ">=6.20.0" }]
-
-[[package]]
 name = "certifi"
 version = "2026.2.25"
 source = { registry = "https://pypi.org/simple" }
@@ -239,6 +208,37 @@ sdist = { url = "https://files.pythonhosted.org/packages/10/2f/97589876ea9674879
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c7/d1/a9f36f8ecdf0fb7c9b1e78c8d7af12b8c8754e74851ac7b94a8305540fc7/macholib-1.16.4-py2.py3-none-any.whl", hash = "sha256:da1a3fa8266e30f0ce7e97c6a54eefaae8edd1e5f86f3eb8b95457cae90265ea", size = 38117, upload-time = "2025-11-22T08:28:36.939Z" },
 ]
+
+[[package]]
+name = "noxia-security-gui"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "customtkinter" },
+    { name = "pillow" },
+    { name = "pydantic-settings" },
+    { name = "pytest" },
+    { name = "requests" },
+    { name = "tkintermapview" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pyinstaller" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "customtkinter", specifier = ">=5.2.2" },
+    { name = "pillow", specifier = ">=12.2.0" },
+    { name = "pydantic-settings", specifier = ">=2.14.0" },
+    { name = "pytest", specifier = ">=9.0.3" },
+    { name = "requests", specifier = ">=2.33.1" },
+    { name = "tkintermapview", specifier = ">=1.29" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pyinstaller", specifier = ">=6.20.0" }]
 
 [[package]]
 name = "packaging"

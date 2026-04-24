@@ -2,7 +2,7 @@ import os
 import tkintermapview
 import customtkinter as ctk
 from PIL import Image, ImageTk
-from config.settings import COLORS, IMG_DIR
+from config.settings import COLORS, IMG_DIR, FONTS
 
 class MapView(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
@@ -36,5 +36,5 @@ class MapView(ctk.CTkFrame):
         is_ok = (status.strip().upper() == "OK")
         icon = self.img_ok if is_ok else self.img_err
         
-        self.map_widget.set_marker(lat, lng, text=f"État : {status}", icon=icon, text_color=COLORS["text"])
+        self.map_widget.set_marker(lat, lng, text=f"État : {status}", icon=icon, text_color=COLORS["text"], font=FONTS["small"])
         self.map_widget.set_zoom(14)
