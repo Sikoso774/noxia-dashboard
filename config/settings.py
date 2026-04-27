@@ -5,7 +5,9 @@ le chargement des polices, et définit la charte graphique de l'UI.
 """
 
 import sys
+from typing import Any
 from pathlib import Path
+import keyring
 import customtkinter as ctk
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -42,7 +44,18 @@ class Settings(BaseSettings):
         API_KEY (str): Clé d'API secrète de KissGroup.
     """
     BASE_URL: str = Field(validation_alias="BASE_URL")
-    API_KEY: str = Field(validation_alias="KISSGROUP_API_KEY")
+    API_KEY: str = Field(default="", validation_alias="KISSGROUP_API_KEY")
+
+    @field_validator('API_KEY', mode='before')
+    @classmethod
+    def get_from_keyring(cls, v: Any) -> str:
+        """Récupère la clé API depuis le keyring système si disponible."""
+        # On priorité le coffre-fort système (Windows Credential Manager)
+        secret = keyring.get_password("NoxiaDashboard", "API_KEY")
+        if secret:
+            return secret
+        # Sinon on utilise la valeur du .env ou de la variable d'environnement
+        return str(v) if v else ""
     
     model_config = SettingsConfigDict(
     env_file=str(ENV_PATH),

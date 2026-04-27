@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "customtkinter>=5.2.2",
+    "keyring>=25.7.0",
     "pillow>=12.2.0",
     "pydantic-settings>=2.14.0",
     "pytest>=9.0.3",

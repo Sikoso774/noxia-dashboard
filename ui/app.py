@@ -1,133 +1,72 @@
-"""Module principal de l'application Noxia Security Dashboard.
-
-Ce module contient la classe principale de l'interface graphique (App),
-qui hérite de customtkinter.CTk et gère la navigation entre les différents
-onglets (Liste des Liens, Supervision).
-"""
-
 import os
-from typing import Dict, Any
 import customtkinter as ctk
 from PIL import Image
-
-# Imports explicites pour respecter la PEP8 (au lieu de import *)
 from config.settings import COLORS, FONTS, ASSETS_DIR, LOGO_FILENAME, LOGO_WIDTH
 from ui.tab_list import TabListe
 from ui.tab_supervision import TabSupervision
+from ui.setup_frame import SetupFrame
 from services.api_client import API_Client
 
+from ui.setup_frame import SetupFrame
+from config.settings import settings, COLORS
 
 class App(ctk.CTk):
-    """Classe principale de l'application Noxia Security Dashboard.
-
-    Gère l'initialisation de la fenêtre principale, la création des onglets,
-    et l'injection des dépendances (API Client).
-
-    Attributes:
-        api (API_Client): Instance du client API pour les requêtes réseau.
-        tabview (ctk.CTkTabview): Gestionnaire des onglets de l'application.
-        tab_liste (TabListe): Onglet affichant la liste des liens.
-        tab_supervision (TabSupervision): Onglet affichant la supervision d'un lien.
-    """
-
-    def __init__(self) -> None:
-        """Initialise la fenêtre principale et configure les composants de l'interface."""
+    def __init__(self):
         super().__init__()
-
-        self.title("NOXIA Security - DASHBOARD")
+        self.title("NOXIA SECURITY")
+        self.geometry("1200x800")
         self.configure(fg_color=COLORS["bg"])
 
-        # Configuration de la fenêtre responsive
-        screen_width: int = self.winfo_screenwidth()
-        screen_height: int = self.winfo_screenheight()
-        self.geometry(f"{int(screen_width * 0.85)}x{int(screen_height * 0.85)}")
-        self.minsize(900, 600)
-        
-        # Tentative d'ouverture de la fenêtre en mode plein écran (maximisé)
-        try:
-            self.state("zoomed")
-        except Exception:
-            # Sous certains OS (ex: Linux sans support zoom), on ignore l'erreur
-            pass
+        # Au démarrage, on vérifie la clé
+        if not settings.API_KEY:
+            self.show_setup()
+        else:
+            self.init_dashboard()
 
-        # Initialisation des services métier
+    def show_setup(self):
+        """Affiche le formulaire de configuration"""
+        self.setup_view = SetupFrame(self, on_success=self.complete_setup)
+        self.setup_view.pack(fill="both", expand=True)
+
+    def complete_setup(self, key):
+        """Appelé quand la clé est validée"""
+        settings.API_KEY = key
+        self.setup_view.pack_forget() # On retire proprement le cadre de setup
+        self.init_dashboard()        # On lance le vrai contenu
+
+    def init_dashboard(self) -> None:
+        """Initialise le contenu du dashboard (API, Tabs, etc.)."""
         self.api = API_Client()
+        # 1. AJOUTE CES DEUX LIGNES : Création du conteneur principal
+        self.container = ctk.CTkFrame(self, fg_color=COLORS["bg"])
+        self.container.pack(fill="both", expand=True)
 
-        # Construction de l'interface utilisateur
-        self.setup_header()
-
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-
-        # Configuration du système d'onglets
-        self.tabview = ctk.CTkTabview(
-            self,
-            fg_color=COLORS["bg"],
-            segmented_button_fg_color=COLORS["bg"],  # Rend le fond de la barre invisible
-            segmented_button_selected_color=COLORS["primary"],
-            segmented_button_selected_hover_color=COLORS["primary_hover"],
-            segmented_button_unselected_color=COLORS["bg"],  # Onglet inactif transparent
-            segmented_button_unselected_hover_color=COLORS["card_alt"],
-            text_color=COLORS["text"]  # Texte blanc pour tous les onglets
-        )
-
-        # Rendre la tabview responsive pour occuper tout l'espace disponible
-        self.tabview.pack(fill="both", expand=True, padx=10, pady=10)
-
-        # Configuration des polices pour la barre de navigation des onglets
-        self.tabview._segmented_button.configure(font=FONTS["subtitle"])
-
-        self.tab_liste_frame = self.tabview.add("Liste des Liens")
-        self.tab_supervision_frame = self.tabview.add("Supervision")
-
-        # Initialisation et rattachement des onglets séparés
-        self.tab_supervision = TabSupervision(self.tab_supervision_frame, self.api)
-        self.tab_liste = TabListe(self.tab_liste_frame, self.api, self.go_to_monitoring)
-
-        # Retirer le focus (curseur clignotant) si on clique en dehors de la recherche
-        self.bind_all("<Button-1>", self._clear_focus)
-
-    def _clear_focus(self, event: Any) -> None:
-        """Retire le focus des zones de texte si l'utilisateur clique ailleurs.
-
-        Args:
-            event (Any): L'événement Tkinter déclenché par le clic souris.
-        """
-        try:
-            # On vérifie le type du widget sur lequel on vient de cliquer
-            widget_type = type(event.widget).__name__
-            # CustomTkinter utilise sous le capot les widgets standard Tk (ex: 'Entry')
-            if widget_type not in ("CTkEntry", "Entry", "CTkTextbox", "Text"):
-                # Si ce n'est pas une zone de saisie, on force la perte de focus
-                self.focus_set()
-        except Exception:
-            pass
-
-    def setup_header(self) -> None:
-        """Configure et affiche l'en-tête de l'application avec le logo."""
-        self.header_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.header_frame.pack(pady=20, padx=20, fill="x")
+        # 2. Ton code existant continue ici...
+        self.header = ctk.CTkFrame(self.container, fg_color="transparent")
         
+        # Header
+        self.header = ctk.CTkFrame(self.container, fg_color="transparent")
+        self.header.pack(pady=20, padx=20, fill="x")
+        self._load_logo(self.header)
+
+        # Tabs
+        self.tabview = ctk.CTkTabview(self.container, fg_color=COLORS["bg"])
+        self.tabview.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        t1 = self.tabview.add("Liste des Liens")
+        t2 = self.tabview.add("Supervision")
+        
+        self.tab_supervision = TabSupervision(t2, self.api)
+        self.tab_liste = TabListe(t1, self.api, self.go_to_monitoring)
+
+    def _load_logo(self, parent):
         try:
-            logo_path: str = os.path.join(ASSETS_DIR, LOGO_FILENAME)
-            pil_img = Image.open(logo_path)
-            ratio: float = pil_img.height / pil_img.width
-            logo_img = ctk.CTkImage(
-                light_image=pil_img, 
-                dark_image=pil_img, 
-                size=(LOGO_WIDTH, int(LOGO_WIDTH * ratio))
-            )
-            self.logo_label = ctk.CTkLabel(self.header_frame, image=logo_img, text="")
-            self.logo_label.pack(side="left", padx=(0, 20))
-        except Exception as e:
-            # Fallback en cas de logo manquant pour ne pas crasher l'UI
-            print(f"Erreur lors du chargement du logo : {e}")
+            path = os.path.join(ASSETS_DIR, LOGO_FILENAME)
+            img = Image.open(path)
+            logo = ctk.CTkImage(img, size=(LOGO_WIDTH, int(LOGO_WIDTH * (img.height/img.width))))
+            ctk.CTkLabel(parent, image=logo, text="").pack(side="left")
+        except: pass
 
-    def go_to_monitoring(self, link: Dict[str, Any]) -> None:
-        """Bascule vers l'onglet Supervision et charge les données du lien sélectionné.
-
-        Args:
-            link (Dict[str, Any]): Dictionnaire contenant les informations du lien à superviser.
-        """
+    def go_to_monitoring(self, link):
         self.tabview.set("Supervision")
         self.tab_supervision.load_client(link)
