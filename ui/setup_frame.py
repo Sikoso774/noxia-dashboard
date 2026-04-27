@@ -5,14 +5,29 @@ import keyring
 from config.settings import COLORS, FONTS, ASSETS_DIR, LOGO_FILENAME, LOGO_WIDTH
 
 class SetupFrame(ctk.CTkFrame):
-    """Vue de configuration initiale sécurisée avec un design premium."""
+    """Vue de configuration initiale sécurisée avec un design premium.
     
-    def __init__(self, master, on_success, **kwargs):
+    Cette classe gère l'affichage du formulaire de saisie de la clé API,
+    son enregistrement sécurisé via keyring, et notifie le parent en cas de succès.
+    
+    Attributes:
+        on_success (callable): Fonction de rappel après enregistrement réussi.
+    """
+    
+    def __init__(self, master: Any, on_success: callable, **kwargs: Any) -> None:
+        """Initialise le cadre de configuration.
+        
+        Args:
+            master: Le widget parent (généralement App).
+            on_success: Callback appelé avec la clé API une fois sauvegardée.
+            **kwargs: Arguments supplémentaires pour CTkFrame.
+        """
         super().__init__(master, fg_color=COLORS["bg"], **kwargs)
         self.on_success = on_success
         self._setup_ui()
 
     def _setup_ui(self) -> None:
+        """Construit l'interface graphique avec le logo et la carte de saisie."""
         # Conteneur principal centré pour tout le contenu (Logo + Carte)
         self.main_container = ctk.CTkFrame(self, fg_color="transparent")
         self.main_container.place(relx=0.5, rely=0.5, anchor="center")
@@ -74,8 +89,12 @@ class SetupFrame(ctk.CTkFrame):
         self.info_label = ctk.CTkLabel(self.card, text="", font=FONTS["small"])
         self.info_label.pack(pady=(0, 20))
 
-    def _load_logo(self, parent) -> None:
-        """Charge le logo Noxia avec le bon ratio."""
+    def _load_logo(self, parent: ctk.CTkFrame) -> None:
+        """Charge le logo Noxia avec le bon ratio.
+        
+        Args:
+            parent: Le widget parent où placer le logo.
+        """
         try:
             path = os.path.join(ASSETS_DIR, LOGO_FILENAME)
             pil_img = Image.open(path)
@@ -91,7 +110,7 @@ class SetupFrame(ctk.CTkFrame):
             print(f"Logo error: {e}")
 
     def _on_enter_press(self) -> None:
-        """Déclenché lors de l'appui sur Entrée."""
+        """Gère l'événement d'appui sur la touche Entrée."""
         # Effet visuel de "clignotement" sur le bouton
         original_color = self.save_btn.cget("fg_color")
         self.save_btn.configure(fg_color=COLORS["primary_hover"])
@@ -101,7 +120,7 @@ class SetupFrame(ctk.CTkFrame):
         self._save_key()
 
     def _save_key(self) -> None:
-        """Valide et enregistre la clé."""
+        """Valide la saisie et enregistre la clé dans le coffre-fort système."""
         key = self.api_key_entry.get().strip()
         if not key:
             self.info_label.configure(text="❌ Veuillez saisir une clé", text_color=COLORS["error"])

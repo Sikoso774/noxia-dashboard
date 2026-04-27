@@ -6,19 +6,17 @@ onglets (Liste des Liens, Supervision).
 """
 
 import os
+from typing import Any, Dict
 import customtkinter as ctk
 from PIL import Image
-from config.settings import COLORS, FONTS, ASSETS_DIR, LOGO_FILENAME, LOGO_WIDTH
+from config.settings import COLORS, FONTS, ASSETS_DIR, LOGO_FILENAME, LOGO_WIDTH, settings
 from ui.tab_list import TabListe
 from ui.tab_supervision import TabSupervision
 from ui.setup_frame import SetupFrame
 from services.api_client import API_Client
 
-from ui.setup_frame import SetupFrame
-from config.settings import settings, COLORS
 
 class App(ctk.CTk):
-
     """Classe principale de l'application Noxia Security Dashboard.
 
     Gère l'initialisation de la fenêtre principale, la création des onglets,
@@ -32,43 +30,46 @@ class App(ctk.CTk):
     """
 
     def __init__(self) -> None:
-        """Initialise la fenêtre principale et configure les composants de l'interface.
-        """
+        """Initialise la fenêtre principale et configure les composants de l'interface."""
         super().__init__()
         self.title("NOXIA SECURITY")
         self.geometry("1200x800")
         self.configure(fg_color=COLORS["bg"])
 
-        # Au démarrage, on vérifie la clé
+        # Au démarrage, on vérifie la présence d'une clé API valide
         if not settings.API_KEY:
             self.show_setup()
         else:
             self.init_dashboard()
 
-    def show_setup(self):
-        """Affiche le formulaire de configuration"""
+    def show_setup(self) -> None:
+        """Affiche le formulaire de configuration initiale."""
         self.setup_view = SetupFrame(self, on_success=self.complete_setup)
         self.setup_view.pack(fill="both", expand=True)
 
-    def complete_setup(self, key):
-        """Appelé quand la clé est validée"""
+    def complete_setup(self, key: str) -> None:
+        """Finalise la configuration après la validation de la clé.
+        
+        Args:
+            key: La clé API saisie par l'utilisateur.
+        """
         settings.API_KEY = key
-        self.setup_view.pack_forget() # On retire proprement le cadre de setup
-        self.init_dashboard()        # On lance le vrai contenu
+        self.setup_view.pack_forget()  # On retire proprement le cadre de setup
+        self.init_dashboard()         # On lance le contenu principal
 
     def init_dashboard(self) -> None:
-        """Initialise le contenu du dashboard (API, Tabs, etc.)."""
+        """Initialise le contenu principal du dashboard (API, Onglets, etc.)."""
         self.api = API_Client()
 
         self.container = ctk.CTkFrame(self, fg_color=COLORS["bg"])
         self.container.pack(fill="both", expand=True)
         
-        # Header
+        # En-tête (Header)
         self.header = ctk.CTkFrame(self.container, fg_color="transparent")
         self.header.pack(pady=20, padx=20, fill="x")
         self._load_logo(self.header)
 
-        # Tabs
+        # Configuration des onglets (Tabs)
         self.tabview = ctk.CTkTabview(
             self.container, 
             fg_color=COLORS["bg"],
@@ -90,14 +91,26 @@ class App(ctk.CTk):
         self.tab_supervision = TabSupervision(t2, self.api)
         self.tab_liste = TabListe(t1, self.api, self.go_to_monitoring)
 
-    def _load_logo(self, parent):
+    def _load_logo(self, parent: ctk.CTkFrame) -> None:
+        """Charge et affiche le logo Noxia dans le conteneur spécifié.
+        
+        Args:
+            parent: Le widget parent où placer le logo.
+        """
         try:
             path = os.path.join(ASSETS_DIR, LOGO_FILENAME)
             img = Image.open(path)
             logo = ctk.CTkImage(img, size=(LOGO_WIDTH, int(LOGO_WIDTH * (img.height/img.width))))
             ctk.CTkLabel(parent, image=logo, text="").pack(side="left")
-        except: pass
+        except Exception as e:
+            print(f"Erreur chargement logo: {e}")
 
-    def go_to_monitoring(self, link):
+    def go_to_monitoring(self, link: Dict[str, Any]) -> None:
+        """Bascule vers l'onglet Supervision pour un lien spécifique.
+        
+        Args:
+            link: Dictionnaire contenant les données du lien à superviser.
+        """
         self.tabview.set("Supervision")
         self.tab_supervision.load_client(link)
+

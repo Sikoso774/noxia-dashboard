@@ -38,18 +38,27 @@ class Settings(BaseSettings):
     """Classe de gestion des variables d'environnement via Pydantic.
 
     Lit les valeurs depuis le fichier .env ou les variables système.
+    Intègre également la récupération sécurisée depuis le trousseau Windows.
 
     Attributes:
-        BASE_URL (str): URL de l'API Noxia.
+        BASE_URL (str): URL de l'API Noxia (forcée en HTTPS).
         API_KEY (str): Clé d'API secrète de KissGroup.
     """
+    
     BASE_URL: str = Field(validation_alias="BASE_URL")
     API_KEY: str = Field(default="", validation_alias="KISSGROUP_API_KEY")
 
     @field_validator('API_KEY', mode='before')
     @classmethod
     def get_from_keyring(cls, v: Any) -> str:
-        """Récupère la clé API depuis le keyring système si disponible."""
+        """Récupère la clé API depuis le keyring système si disponible.
+        
+        Args:
+            v: Valeur initiale (provenant de l'env ou du .env).
+        
+        Returns:
+            str: La clé API trouvée dans le keyring ou la valeur initiale.
+        """
         # On priorité le coffre-fort système (Windows Credential Manager)
         secret = keyring.get_password("NoxiaDashboard", "API_KEY")
         if secret:
@@ -58,34 +67,44 @@ class Settings(BaseSettings):
         return str(v) if v else ""
     
     model_config = SettingsConfigDict(
-    env_file=str(ENV_PATH),
-    env_file_encoding="utf-8",
-    extra="ignore",
-    # Priorise le fichier .env sur les variables système
-    env_priority=1)
+        env_file=str(ENV_PATH),
+        env_file_encoding="utf-8",
+        extra="ignore",
+        # Priorise le fichier .env sur les variables système
+        env_priority=1
+    )
 
     @field_validator('BASE_URL')
     @classmethod
     def enforce_https(cls, v: str) -> str:
+        """Assure que l'URL de base utilise le protocole HTTPS.
+        
+        Args:
+            v: L'URL fournie dans la configuration.
+            
+        Returns:
+            str: L'URL validée et éventuellement corrigée.
+            
+        Raises:
+            ValueError: Si l'URL n'est pas sécurisée et ne peut être corrigée.
+        """
         # 1. Si l'URL commence par http://, on la corrige silencieusement
         if v.startswith('http://'):
             print("🛡️ Auto-correction de l'URL HTTP vers HTTPS.")
             v = v.replace('http://', 'https://')
             
-        # 2. Si après correction (ou si c'est une toute autre adresse) ce n'est pas sécurisé
+        # 2. Si après correction ce n'est pas sécurisé
         if not v.startswith('https://'):
             raise ValueError("🛡️ SÉCURITÉ CRITIQUE : La BASE_URL doit obligatoirement utiliser HTTPS.")
             
-        # 3. CRUCIAL : On n'oublie pas de retourner la variable corrigée !
         return v
-    
 
 
 # Instanciation globale des paramètres métier
 try:
     settings = Settings()
-except Exception as e:
-    print(f"ERREUR instanciation de Settings : {e}")
+except Exception as err:
+    print(f"ERREUR instanciation de Settings : {err}")
 
 
 # --- CHARGEMENT DES POLICES EMBARQUÉES ---
@@ -94,12 +113,12 @@ try:
     ctk.FontManager.load_font(str(FONTS_DIR / "Montserrat-Regular.ttf"))
     ctk.FontManager.load_font(str(FONTS_DIR / "Montserrat-Bold.ttf"))
     print("✅ Polices Montserrat chargées avec succès.")
-except Exception as e:
-    print(f"⚠️ Impossible de charger les polices : {e}")
+except Exception as err:
+    print(f"⚠️ Impossible de charger les polices : {err}")
 
 
 # --- CHARTE GRAPHIQUE NOXIA SECURITY (Version Pro) ---
-COLORS = {
+COLORS: Dict[str, str] = {
     "bg": "#000726",          # Fond le plus sombre (Graphiste)
     "card": "#002359",        # Bleu intermédiaire (Graphiste)
     "card_alt": "#01346b",    # Intermédiaire pour le survol
@@ -119,7 +138,7 @@ COLORS = {
 }
 
 # Polices globales
-FONTS = {
+FONTS: Dict[str, Any] = {
     "title": ("Montserrat", 18, "bold"),
     "subtitle": ("Montserrat", 14, "bold"),
     "body": ("Montserrat", 12),
