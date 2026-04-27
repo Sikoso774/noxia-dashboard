@@ -25,11 +25,24 @@ class API_Client:
         headers (Dict[str, str]): En-têtes HTTP incluant la clé d'API.
     """
 
-    def __init__(self) -> None:
-        """Initialise le client API avec les configurations globales."""
+    def __init__(self):
+        # 1. Utilisation d'une Session pour la performance et la sécurité
         self.base_url: str = settings.BASE_URL
-        self.headers: Dict[str, str] = {"api_key": settings.API_KEY}
-        logger.info("API_Client initialisé avec succès")
+        self.session = requests.Session()
+        
+        # 2. Masquage de l'empreinte (User-Agent)
+        # Par défaut, le serveur voit "python-requests/2.31". Un hacker sait donc que c'est un script Python.
+        # On va déguiser l'application pour qu'elle ait l'air légitime :
+        self.session.headers.update({
+            "User-Agent": "NoxiaSecurityDashboard/1.0",
+            "Accept": "application/json",
+            # Si tu passes la clé API par les headers, tu peux la mettre ici une fois pour toutes :
+            "Authorization": f"Bearer {settings.API_KEY}" 
+        })
+        
+        # 3. Timeouts stricts (Anti-DDoS / Anti-Blocage)
+        self.timeout = 10  # Si le serveur ne répond pas sous 10s, on coupe tout.
+        logger.info("API_Client sécurisé initialisé avec succès")
 
     def get_links(self) -> List[Dict[str, Any]]:
         """Récupère la liste complète des liens réseau.
@@ -42,7 +55,7 @@ class API_Client:
         """
         try:
             logger.debug("Tentative de récupération de la liste des liens...")
-            response = requests.get(f"{self.base_url}/links", headers=self.headers)
+            response = self.session.get(f"{self.base_url}/links", headers=self.session.headers)
             response.raise_for_status()
             links: List[Dict[str, Any]] = response.json()
             logger.info(f"{len(links)} liens récupérés avec succès")
@@ -60,7 +73,11 @@ class API_Client:
         """
         try:
             logger.debug("Appel API : /monitoring")
-            response = requests.get(f"{self.base_url}/monitoring", headers=self.headers)
+            response = self.session.get(
+                f"{self.base_url}/monitoring", 
+                headers=self.headers, 
+                timeout=self.timeout, 
+                verity=True)
             response.raise_for_status()
             data = response.json()
             logger.info("Données de monitoring reçues")
@@ -81,7 +98,7 @@ class API_Client:
         """
         try:
             logger.debug(f"Récupération des détails pour le lien : {link_code}")
-            response = requests.get(f"{self.base_url}/links/{link_code}", headers=self.headers)
+            response = self.session.get(f"{self.base_url}/links/{link_code}", headers=self.headers)
             response.raise_for_status()
             logger.info(f"Détails récupérés pour {link_code}")
             return response.json()

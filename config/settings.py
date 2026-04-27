@@ -7,9 +7,8 @@ le chargement des polices, et définit la charte graphique de l'UI.
 import sys
 from pathlib import Path
 import customtkinter as ctk
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 def get_base_path() -> Path:
     """Détermine le chemin racine absolu du projet.
@@ -44,14 +43,29 @@ class Settings(BaseSettings):
     """
     BASE_URL: str = Field(validation_alias="BASE_URL")
     API_KEY: str = Field(validation_alias="KISSGROUP_API_KEY")
-
+    
     model_config = SettingsConfigDict(
-        env_file=str(ENV_PATH),
-        env_file_encoding="utf-8",
-        extra="ignore",
-        # Priorise le fichier .env sur les variables système
-        env_priority=1
-    )
+    env_file=str(ENV_PATH),
+    env_file_encoding="utf-8",
+    extra="ignore",
+    # Priorise le fichier .env sur les variables système
+    env_priority=1)
+
+    @field_validator('BASE_URL')
+    @classmethod
+    def enforce_https(cls, v: str) -> str:
+        # 1. Si l'URL commence par http://, on la corrige silencieusement
+        if v.startswith('http://'):
+            logger.info("🛡️ Auto-correction de l'URL HTTP vers HTTPS.")
+            v = v.replace('http://', 'https://')
+            
+        # 2. Si après correction (ou si c'est une toute autre adresse) ce n'est pas sécurisé
+        if not v.startswith('https://'):
+            raise ValueError("🛡️ SÉCURITÉ CRITIQUE : La BASE_URL doit obligatoirement utiliser HTTPS.")
+            
+        # 3. CRUCIAL : On n'oublie pas de retourner la variable corrigée !
+        return v
+    
 
 
 # Instanciation globale des paramètres métier
