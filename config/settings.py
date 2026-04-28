@@ -45,7 +45,7 @@ class Settings(BaseSettings):
         API_KEY (str): Clé d'API secrète de KissGroup.
     """
     
-    BASE_URL: str = Field(validation_alias="BASE_URL")
+    BASE_URL: str = "https://kissapi.kissgroup.io/kisslink"
     API_KEY: str = Field(default="", validation_alias="KISSGROUP_API_KEY")
 
     @field_validator('API_KEY', mode='before')

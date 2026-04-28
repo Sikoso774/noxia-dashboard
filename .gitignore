@@ -16,3 +16,18 @@ tests/
 # Logs
 logs/
 *.log
+
+# --- NOUVEAUX AJOUTS (Builds & Installeurs) ---
+
+# Dossiers de build (Nuitka / PyInstaller)
+*.dist/
+*.build/
+*.onefile-build/
+dist/
+build/
+
+# Installeurs générés par Inno Setup
+Output/
+
+# Exécutables (pour éviter de push les .exe de test ou finaux)
+*.exe
