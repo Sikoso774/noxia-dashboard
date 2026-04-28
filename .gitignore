@@ -28,6 +28,7 @@ build/
 
 # Installeurs générés par Inno Setup
 Output/
+*.iss
 
 # Exécutables (pour éviter de push les .exe de test ou finaux)
 *.exe
